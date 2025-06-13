@@ -9,14 +9,10 @@ public class MainPage {
     private WebDriver driver;
     //Кнопка "да все привыкли" для принятия cookies
     private By coociesClick = By.id("rcc-confirm-button");
-    //Выпадающий список с текстом "Сколько это стоит? И как оплатить?".
-    private By dropdown0 = By.id("accordion__heading-0");
-    //Можно ли продлить заказ или вернуть самокат раньше?".
-    private By dropdown4 = By.id("accordion__heading-4");
     //Верхняя кнопка "Заказать" находящаяся на хедере.
     private By buttonOrderUp = By.xpath("//button[@class='Button_Button__ra12g']");
     //Нижняя кнопка "Заказать" находящаяся внизу страницы.
-    private By buttonOrderDown = By.xpath("//button[@class='Button_Button__ra12g Button_UltraBig__UU3Lp']");
+    private By buttonOrderDown = By.xpath("//button[@class='Button_Button__ra12g Button_Middle__1CSJM']");
 
 
     public MainPage(WebDriver driver){
@@ -28,19 +24,22 @@ public class MainPage {
         driver.findElement(coociesClick).click();
     }
 
-    //Раскрыть выпадающий список с текстом "Сколько это стоит? И как оплатить?"
-    public void clickToDropdown0(){
-        driver.findElement(dropdown0).click();
+    // Клик по заголовку FAQ по его индексу (0,1,2…) */
+    public void clickDropdown(int index) {
+        By question = By.id("accordion__heading-" + index);
+        driver.findElement(question).click();
+    }
 
+    // Проверить, скрыт ли ответ (есть атрибут hidden) */
+    public boolean isAnswerHidden(int index) {
+        By answer = By.id("accordion__panel-" + index);
+        return driver.findElement(answer).getAttribute("hidden") != null;
     }
-    //Можно ли продлить заказ или вернуть самокат раньше?"
-    public void clickToDropdown4(){
-        driver.findElement(dropdown4).click();
-    }
-    //Шаг, который объединяет в себе сразу 2-ва методы описанных выше
-    public void clickToAllDropdown(){
-        clickToDropdown0();
-        clickToDropdown4();
+
+    // Получить текст ответа FAQ */
+    public String getAnswerText(int index) {
+        By answer = By.id("accordion__panel-" + index);
+        return driver.findElement(answer).getText();
     }
 
     public void clickToButtonOrderUp(){

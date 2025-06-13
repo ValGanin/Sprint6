@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.BeforeEach;
 import pages.MainPage;
 import pages.OrderPage;
 import pages.ScooterPage;
@@ -6,7 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -14,73 +14,102 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class OrderScooterTest {
 
+    private static final String URL = "https://qa-scooter.praktikum-services.ru/";
+    private static final String BROWSER = System.getProperty("browser","chrome");
     private WebDriver driver;
+
 
     //Поставляем пары: браузер + локатор кнопки "Заказать"
     static Stream<Arguments> provideBrowserAndButton() {
         return Stream.of(
-                Arguments.of("chrome", By.xpath("//button[@class='Button_Button__ra12g']")),
-                Arguments.of("chrome", By.xpath("//button[@class='Button_Button__ra12g Button_Middle__1CSJM']")),
-                Arguments.of("firefox", By.xpath("//button[@class='Button_Button__ra12g']")),
-                Arguments.of("firefox", By.xpath("//button[@class='Button_Button__ra12g Button_Middle__1CSJM']"))
-        );
+                Arguments.of("Иван", "Петров", "ул. Ленина", "Сокол", "+79990001111"),
+                Arguments.of("Анна", "Смирнова", "пр. Мира",  "Арбат", "+79990002222")
+                );
     }
 
-    @ParameterizedTest(name = "{0} – проверка кнопки заказа")
-    @MethodSource("provideBrowserAndButton")
-    @DisplayName("Позитивный флоу заказа через кнопку \"Заказать\"")
-    void getOrder(String browser, By buttonLocator) throws InterruptedException {
-        // Инициализируем нужный драйвер
-        if (browser.equalsIgnoreCase("chrome")) {
+    @BeforeEach
+    void setUp() {
+        // инициализация драйвера из системного свойства -Dbrowser=chrome|firefox
+        if (BROWSER.equalsIgnoreCase("firefox")) {
+            driver = new FirefoxDriver();
+        } else {
             ChromeOptions options = new ChromeOptions();
             driver = new ChromeDriver(options);
-        } else {
-            driver = new FirefoxDriver();
         }
         driver.manage().window().maximize();
+        driver.get(URL);
+    }
 
-        // Открываем главную страницу
-        driver.get("https://qa-scooter.praktikum-services.ru/");
+    @ParameterizedTest(name = "{0} {1}: заказ через верхнюю кнопку")
+    @MethodSource("provideBrowserAndButton")
+    @DisplayName("Позитивный флоу заказа через верхнюю кнопку")
+    void orderViaTopButton(String firstName,
+                           String lastName,
+                           String address,
+                           String metro,
+                           String phone) {
+        // 1) Главная страница
+        MainPage main = new MainPage(driver);
+        main.clickToButtonCookies();
+        main.clickToButtonOrderUp();
 
-        // 1) Закрыть баннер cookies
-        MainPage mainPage = new MainPage(driver);
-        mainPage.clickToButtonCookies();
-
-        // 2) Клик по соответствующей кнопке "Заказать"
-        assertTrue(driver.findElement(buttonLocator).isDisplayed(),
-                "Кнопка должна быть видимой в " + browser);
-        driver.findElement(buttonLocator).click();
-
-        // 3) Должен произойти переход на страницу оформления
-        assertTrue(driver.getCurrentUrl().contains("/order"),
-                "Должен быть URL с \"/order\" в " + browser);
-
-        // 4) Первый шаг: ввод личных данных и нажатие "Далее"
+        // 2) Первый шаг: личные данные + Далее
         OrderPage step1 = new OrderPage(driver);
-        step1.fieldName();           // ввод имени
-        step1.fieldSurname();        // ввод фамилии
-        step1.fieldAdress();         // ввод адреса
-        step1.fieldPhoneNumber();    // ввод телефона
-        step1.fieldMetroStation();   // выбор станции метро
-        step1.clickButton();         // нажать "Далее"
+        step1.fieldName(firstName);
+        step1.fieldSurname(lastName);
+        step1.fieldAdress(address);
+        step1.fieldPhoneNumber(phone);
+        step1.fieldMetroStation(metro);
+        step1.clickButton();
 
-        // 5) Второй шаг: заполнение деталей заказа
+        // 3) Второй шаг: детали самоката + Заказать
         ScooterPage step2 = new ScooterPage(driver);
-        step2.fieldDate();           // выбор даты
-        step2.fieldRent();           // выбор срока
-        step2.fieldСolor();          // выбор цвета
-        step2.fieldComment();        // ввод комментария
-        step2.clickButtonOrder();    // нажать "Заказать"
-        step2.clickButtonYes();      // подтвердить "Да"
-        step2.clickButtonSeeStatus();// нажать "Посмотреть статус"
+        step2.fieldDate();
+        step2.fieldRent();
+        step2.fieldСolor();
+        step2.fieldComment();
+        step2.clickButtonOrder();
+        step2.clickButtonYes();
+        step2.clickButtonSeeStatus();
+    }
+
+    @ParameterizedTest(name = "{0} {1}: заказ через нижнюю кнопку")
+    @MethodSource("provideBrowserAndButton")
+    @DisplayName("Позитивный флоу заказа через нижнюю кнопку")
+    void orderViaBottomButton(String firstName,
+                              String lastName,
+                              String address,
+                              String metro,
+                              String phone) {
+        // 1) Главная страница
+        MainPage main = new MainPage(driver);
+        main.clickToButtonCookies();
+        main.clickToButtonOrderDown();
+
+        // 2) Первый шаг: личные данные + Далее
+        OrderPage step1 = new OrderPage(driver);
+        step1.fieldName(firstName);
+        step1.fieldSurname(lastName);
+        step1.fieldAdress(address);
+        step1.fieldPhoneNumber(phone);
+        step1.fieldMetroStation(metro);
+        step1.clickButton();
+
+        // 3) Второй шаг: детали самоката + Заказать
+        ScooterPage step2 = new ScooterPage(driver);
+        step2.fieldDate();
+        step2.fieldRent();
+        step2.fieldСolor();
+        step2.fieldComment();
+        step2.clickButtonOrder();
+        step2.clickButtonYes();
+        step2.clickButtonSeeStatus();
     }
 
     @AfterEach
-    public void teardown() {
+    void tearDown() {
         if (driver != null) {
             driver.quit();
         }

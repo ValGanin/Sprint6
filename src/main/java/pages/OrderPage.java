@@ -4,9 +4,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 public class OrderPage {
 
@@ -25,37 +22,39 @@ public class OrderPage {
     private By button = By.xpath("//button[@class='Button_Button__ra12g Button_Middle__1CSJM']");
 
     public OrderPage(WebDriver driver){
+
         this.driver=driver;
     }
     // Заполнить поле "Имя"
-    public void fieldName(){
-        driver.findElement(name).sendKeys("Иванов");
+    public void fieldName(String firstName){
+
+        driver.findElement(name).sendKeys(firstName);
     }
     // Заполнить поле "Фамилия"
-    public void fieldSurname(){
-        driver.findElement(surname).sendKeys("Иван");
+    public void fieldSurname(String lastName){
+
+        driver.findElement(surname).sendKeys(lastName);
     }
     // Заполнить поле "Адрес"
-    public void fieldAdress(){
-        driver.findElement(adress).sendKeys("Ивановская 1");
+    public void fieldAdress(String address){
+
+        driver.findElement(adress).sendKeys(address);
     }
     // Заполнить поле "Станция метро"
-    public void fieldMetroStation(){
-        // 1. Находим поле ввода и кликаем по нему
-        WebElement dropdownInput = driver.findElement(By.xpath("//input[@placeholder='* Станция метро']"));
-        dropdownInput.click();
-        // 2. Ждем появления выпадающего списка
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        //3. Выбираем вариант. Использование клавиш.
-        dropdownInput.sendKeys("Черкизовская");
-        dropdownInput.sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
+    public void fieldMetroStation(String metro){
+        WebElement metroField = driver.findElement(metroStation);
+        metroField.click();
+        metroField.sendKeys(metro);
+        metroField.sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
     }
     // Заполнить поле "Телефон"
-    public void fieldPhoneNumber(){
-        driver.findElement(phoneNumber).sendKeys("89001112233");
+    public void fieldPhoneNumber(String phone){
+
+        driver.findElement(phoneNumber).sendKeys(phone);
     }
     // Нажать ЛКМ на кнопку "Далее"
     public void clickButton(){
+
         driver.findElement(button).click();
     }
 
